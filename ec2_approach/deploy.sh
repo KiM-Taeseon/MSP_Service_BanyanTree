@@ -5,7 +5,7 @@ set -e
 
 # Get current AWS account and region
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-AWS_REGION="ap-northeast-2"
+AWS_REGION="ap-northeast-1" # TODO:: change this accordingly
 KEY_NAME="banyan_key"
 
 # Variables

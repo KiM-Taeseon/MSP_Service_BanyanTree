@@ -20,8 +20,8 @@ sudo yum -y install terraform
 
 # Set up environment variables
 cat > /etc/environment <<EOF
-CONFIG_BUCKET=terraform-configs-runner-157931043046 
-AWS_REGION=ap-northeast-2
+CONFIG_BUCKET=terraform-configs-runner-939735320461
+AWS_REGION=ap-northeast-1
 EOF
 
 # Create project-builder user
