@@ -4,7 +4,7 @@ resource "aws_s3_bucket" "terraform_state" {
   bucket = var.state_bucket_name
   
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
@@ -31,7 +31,7 @@ resource "aws_s3_bucket" "terraform_configs" {
   bucket = var.config_bucket_name
   
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
 
