@@ -9,7 +9,7 @@ yum install -y wget unzip python3 python3-pip git jq util-linux yum-utils
 # Set up environment variables
 cat > /etc/environment <<EOF
 STATE_BUCKET=terraform-state-runner-157931043046
-CONFIG_BUCKET=terraform-configs-runner-157931043046 
+CONFIG_BUCKET=terraform-configs-runner-157931043046
 AWS_REGION=ap-northeast-1
 KEY_NAME=server-key.pem
 EOF
@@ -27,8 +27,8 @@ sudo yum -y install terraform
 # Install AWS CLI
 pip3 install awscli --upgrade
 
-mkdir -p /home/terraform//.ssh
-chmod 700 /home/terraform//.ssh
+mkdir -p /home/terraform/.ssh
+chmod 700 /home/terraform/.ssh
 
 cat > "/home/terraform/.ssh/$KEY_NAME" << 'EOF'
 ----BEGIN OPENSSH PRIVATE KEY-----
