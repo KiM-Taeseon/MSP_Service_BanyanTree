@@ -8,8 +8,8 @@ yum install -y wget unzip python3 python3-pip git jq util-linux yum-utils
 
 # Set up environment variables
 cat > /etc/environment <<EOF
-STATE_BUCKET=terraform-state-runner-157931043046
-CONFIG_BUCKET=terraform-configs-runner-157931043046
+STATE_BUCKET=terraform-state-runner-939735320461
+CONFIG_BUCKET=terraform-configs-runner-939735320461
 AWS_REGION=ap-northeast-1
 KEY_NAME=server-key.pem
 EOF
@@ -27,11 +27,13 @@ sudo yum -y install terraform
 # Install AWS CLI
 pip3 install awscli --upgrade
 
-mkdir -p /home/terraform/.ssh
-chmod 700 /home/terraform/.ssh
+sudo mkdir -p /home/terraform/.ssh
+sudo chown terraform:terraform "/home/terraform/.ssh"
+sudo chmod 700 /home/terraform/.ssh
+
 
 cat > "/home/terraform/.ssh/$KEY_NAME" << 'EOF'
-----BEGIN OPENSSH PRIVATE KEY-----
+-----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
 NhAAAAAwEAAQAAAQEApskiaxZ2Wt5DeeL7be25ToeufhPR01Cu9CaLAJXf3+Xh+j9mDtj7
 gifTaX7LoefVIctCjkpOf/NNgdHlEL6Nc+Skuk5i6TwidLuHV7mG3tsk7Xv34DUTRT4xBN
@@ -60,8 +62,8 @@ sxaWW7Hz6Ca9gSXHAAAAEnJvb3RAaXAtMTAtMC0wLTE1NQ==
 -----END OPENSSH PRIVATE KEY-----
 EOF
 
-chmod 600 "/home/terraform/.ssh/$KEY_NAME"
-chown terraform:terraform "/home/terraform/.ssh/$KEY_NAME"
+sudo chmod 600 "/home/terraform/.ssh/$KEY_NAME"
+sudo chown terraform:terraform "/home/terraform/.ssh/$KEY_NAME"
 
 echo "Private key installed at /home/terraform/$KEY_NAME"
 
