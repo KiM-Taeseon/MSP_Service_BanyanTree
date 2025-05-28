@@ -30,7 +30,7 @@ class InputFileHandler(FileSystemEventHandler):
                     data = json.load(f)
 
                 response = requests.post(
-                    "http://3.35.235.224:8081/build-project",  # 필요 시 EC2 IP로 변경
+                    "http://57.182.140.40:8081/build-project",  # 필요 시 EC2 IP로 변경
                     headers={"Content-Type": "application/json"},
                     json=data
                 )

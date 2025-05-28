@@ -221,142 +221,131 @@
     </div>
 
     <script>
-    const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(window.location.search);
 
-    const userId = params.get("userId");
-    const region = params.get("region");
-    const ec2 = params.get("ec2");
-    const ec2type = params.get("ec2type");
-    const s3 = params.get("s3");
-    const rds = params.get("rds");
+        const userId = params.get("userId");
+        const region = params.get("region");
+        const ec2 = params.get("ec2");
+        const ec2type = params.get("ec2type");
+        const s3 = params.get("s3");
+        const rds = params.get("rds");
 
-    // 정보 표시
-    document.getElementById("regionBox").textContent = `리전: ${region ?? "-"}`;
-    document.getElementById("ec2Box").textContent = `EC2 인스턴스 수: ${ec2 ?? "-"}`;
-    document.getElementById("typeBox").textContent = `EC2 타입: ${ec2type ?? "-"}`;
-    document.getElementById("s3Box").textContent = `S3 버킷 수: ${s3 ?? "-"}`;
-    document.getElementById("rdsBox").textContent = `RDS 인스턴스 수: ${rds ?? "-"}`;
+        // 정보 표시
+        document.getElementById("regionBox").textContent = `리전: ${region ?? "-"}`;
+        document.getElementById("ec2Box").textContent = `EC2 인스턴스 수: ${ec2 ?? "-"}`;
+        document.getElementById("typeBox").textContent = `EC2 타입: ${ec2type ?? "-"}`;
+        document.getElementById("s3Box").textContent = `S3 버킷 수: ${s3 ?? "-"}`;
+        document.getElementById("rdsBox").textContent = `RDS 인스턴스 수: ${rds ?? "-"}`;
 
-    // 리전 아키텍처 이미지 로드
-    const img = document.getElementById("diagramImage");
-    if (region) {
-        img.src = `/diagrams/${region}.png`;
-        img.alt = `${region} 아키텍처 다이어그램`;
-        img.style.display = "block";
-    } else {
-        img.style.display = "none";
-    }
+        // 리전 아키텍처 이미지 로드
+        const img = document.getElementById("diagramImage");
+        if (region) {
+            img.src = `/diagrams/${region}.png`;
+            img.alt = `${region} 아키텍처 다이어그램`;
+            img.style.display = "block";
+        } else {
+            img.style.display = "none";
+        }
 
-    // 키 확인 플래그
-    let keyDetected = false;
-    let ketCheckInterval = null;
+        // 배포 시작 버튼 이벤트
+        document.getElementById("submitConfig").addEventListener("click", async () => {
+            const projectName = document.getElementById("projectName").value.trim();
+            const githubUrl = document.getElementById("githubUrl").value.trim();
+            const accessKey = document.getElementById("accessKey").value.trim();
+            const secretKey = document.getElementById("secretKey").value.trim();
+            const sessionToken = document.getElementById("sessionToken").value.trim();
+            const dbName = document.getElementById("dbName").value.trim();
+            const dbPassword = document.getElementById("dbPassword").value.trim();
 
-    async function fetchKeys() {
-        try {
-            const res = await fetch("/available-keys.php");
-            const keysData = await res.json();
-            const keyBox = document.getElementById("keyLinks");
-            const list = document.getElementById("keyList");
-            list.innerHTML = "";
+            // 유효성 검사
+            if (dbName.includes("_")) {
+                alert("❌ Database 이름에 밑줄(_)을 사용할 수 없습니다.");
+                return;
+            }
 
-            if (keysData.length > 0) {
-                if (!keyDetected) {
-                    alert("🎉 AWS 인프라 생성 완료! SSH 키를 다운로드하세요.");
-                    keyDetected = true;
-				
-		    document.getElementById("loadingModal").style.display = "none";
-                    clearInterval(keyCheckInterval);				    
+            if (dbPassword.length < 8) {
+                alert("❌ Database 비밀번호는 8자 이상이어야 합니다.");
+                return;
+            }
+
+            if (!projectName || !githubUrl || !accessKey || !secretKey || !sessionToken || !dbName || !dbPassword || !region || !ec2 || !s3 || !rds) {
+                alert("모든 항목을 입력하세요.");
+                return;
+            }
+
+            const payload = {
+                project_name: projectName,
+                infrastructure_spec: {
+                    user_name: userId,
+                    region: region,
+                    project_link: githubUrl,
+                    access_key: accessKey,
+                    secret_key: secretKey,
+                    session_token: sessionToken,
+                    instance_count: parseInt(ec2),
+                    db_identifier: `${projectName}db`,
+                    db_count: parseInt(rds),
+                    db_username: dbName,
+                    db_password: dbPassword,
+                    bucket_count: parseInt(s3)
                 }
-                keyBox.style.display = "block";
+            };
 
-                // 최신 키 선택
-                const latestKey = keysData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-                const li = document.createElement("li");
-                const link = document.createElement("a");
-		link.href = `/download-pem.php?file=${latestKey.filename}`;
-                link.textContent = `⬇️ ${latestKey.filename}`;
-                link.setAttribute("download", latestKey.filename);
-                li.appendChild(link);
-                list.appendChild(li);
-            } else {
-                keyBox.style.display = "none";
+            try {
+                const res = await fetch("/final", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("✅ 인프라 생성 요청 및 최종 저장이 완료되었습니다.");
+                } else {
+                    throw new Error(`요청 실패: ${res.status}`);
+                }
+            } catch (err) {
+                alert("❌ 요청 실패: " + err.message);
             }
-        } catch (err) {
-            console.error("키 목록 불러오기 실패:", err);
-        }
-    }
+        });
 
-    // 배포 시작 버튼 이벤트
-    document.getElementById("submitConfig").addEventListener("click", async () => {
-        const projectName = document.getElementById("projectName").value.trim();
-        const githubUrl = document.getElementById("githubUrl").value.trim();
-        const accessKey = document.getElementById("accessKey").value.trim();
-        const secretKey = document.getElementById("secretKey").value.trim();
-        const sessionToken = document.getElementById("sessionToken").value.trim();
-        const dbName = document.getElementById("dbName").value.trim();
-        const dbPassword = document.getElementById("dbPassword").value.trim();
+        // 키 파일 확인 및 다운로드 기능
+        let keyDetected = false;
+        
+        async function fetchKeys() {
+            try {
+                const res = await fetch("/available-keys.php");
+                const keysData = await res.json();
+                const keyBox = document.getElementById("keyLinks");
+                const list = document.getElementById("keyList");
+                list.innerHTML = "";
 
-        if (dbName.includes("_")) {
-            alert("❌ Database 이름에 밑줄(_)을 사용할 수 없습니다.");
-            return;
-        }
+                if (keysData.length > 0) {
+                    if (!keyDetected) {
+                        alert("🎉 AWS 인프라 생성 완료! SSH 키를 다운로드하세요.");
+                        keyDetected = true;
+                    }
+                    keyBox.style.display = "block";
 
-        if (dbPassword.length < 8) {
-            alert("❌ Database 비밀번호는 8자 이상이어야 합니다.");
-            return;
-        }
+                    // 생성 시간 기준으로 정렬해서 가장 최근 파일 선택
+                    const latestKey = keysData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
 
-	if (!/^[a-z]+$/.test(projectName)) {
-	    alert("❌ 프로젝트 이름은 소문자(a~z)만 사용할 수 있습니다.");
-    	    return;
-	}
-
-        if (!projectName || !githubUrl || !accessKey || !secretKey || !sessionToken || !dbName || !dbPassword || !region || !ec2 || !s3 || !rds) {
-            alert("모든 항목을 입력하세요.");
-            return;
-        }
-
-        const payload = {
-            project_name: projectName,
-            infrastructure_spec: {
-                user_name: userId,
-                region: region,
-                project_link: githubUrl,
-                access_key: accessKey,
-                secret_key: secretKey,
-                session_token: sessionToken,
-                instance_count: parseInt(ec2),
-                db_identifier: `${projectName}db`,
-                db_count: parseInt(rds),
-                db_username: dbName,
-                db_password: dbPassword,
-                bucket_count: parseInt(s3)
+                    const li = document.createElement("li");
+                    const link = document.createElement("a");
+                    link.href = `/root/sshkey/${latestKey.filename}`;
+                    link.textContent = `⬇️ ${latestKey.filename}`;
+                    link.setAttribute("download", latestKey.filename);
+                    li.appendChild(link);
+                    list.appendChild(li);
+                } else {
+                    keyBox.style.display = "none";
+                }
+            } catch (err) {
+                console.error("키 목록 불러오기 실패:", err);
             }
-        };
-
-        // 로딩 모달 표시
-        document.getElementById("loadingModal").style.display = "flex";
-	keyDetected = false;
-
-        try {
-            const res = await fetch("/final", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-                alert("✅ 인프라 생성 요청 및 최종 저장이 완료되었습니다.");
-                // 키 확인 주기적으로 시작
-                keyCheckInterval = setInterval(fetchKeys, 5000); // 5초마다 확인
-            } else {
-                throw new Error(`요청 실패: ${res.status}`);
-            }
-        } catch (err) {
-            alert("❌ 요청 실패: " + err.message);
-	    document.getElementById("loadingModal").style.display = "none";   
         }
-    });
+
+        fetchKeys();
+        setInterval(fetchKeys, 5000);
     </script>
 </body>
 </html>

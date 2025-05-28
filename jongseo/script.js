@@ -82,7 +82,7 @@ document.getElementById("awsForm").addEventListener("submit", async function (ev
 
         titleWrapper.appendChild(topRegionsDiv);
 
-        let resultHTML = `<h2>최저가 리전: ${cheapest[0]} ($${cheapest[1]}/h)</h2>`;
+        let resultHTML = `<h2>최저가 리전: ${cheapest[0]} (시간 당 $${cheapest[1]})</h2>`;
         resultHTML += `<table>
         <thead>
           <tr>
