@@ -34,4 +34,3 @@ terraform.rc
 .terraform.lock.hcl
 
 taeseon/ec2_approach/infrastructure/.terraform/
-taeseon/ec2_approach/infrastructure/.terraform/
