@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>AWS 리소스 입력</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="container">
+    <h1>AWS 리소스 수 입력</h1>
+    <form id="awsForm">
+        <label for="userId">사용자 ID:</label>
+        <input type="text" id="userId" name="userId" required placeholder="예: michael123">
+
+        <label for="ec2">EC2 인스턴스 개수:</label>
+        <input type="number" id="ec2" name="ec2" min="0" required value="2">
+
+        <label for="ec2type">EC2 인스턴스 타입:</label>
+        <select id="ec2type" name="ec2type" required>
+            <option value="t2.micro">t2.micro</option>
+            <option value="t2.small">t2.small</option>
+            <option value="t2.medium">t2.medium</option>
+            <option value="t3.micro">t3.micro</option>
+            <option value="t3.small">t3.small</option>
+            <option value="t3.medium">t3.medium</option>
+        </select>
+
+        <label for="s3">S3 버킷 개수:</label>
+        <input type="number" id="s3" name="s3" min="0" required value="1">
+
+        <label for="rds">RDS 인스턴스 개수:</label>
+        <input type="number" id="rds" name="rds" min="0" required value="1">
+
+        <button type="submit">비용 계산</button>
+    </form>
+
+    <div id="output"></div>
+</main>
+
+<aside class="right-pane">
+    <div id="topRegionTitleWrapper"></div> <!-- 제목 + 버튼 영역 -->
+    <div id="diagramWrapper"></div>        <!-- 다이어그램 이미지 -->
+</aside>
+
+<script src="script.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>리전 세부 설정</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        .side-info, .db-info, .diagram-pane {
+            padding: 30px;
+        }
+
+        .side-info {
+            width: 25%;
+            background: #ffffff;
+            border-right: 1px solid #ddd;
+        }
+
+        .db-info {
+            width: 25%;
+            background: #ffffff;
+            border-right: 1px solid #ddd;
+        }
+
+        .diagram-pane {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f4f8;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .info-box {
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: #f0f4ff;
+            border-left: 4px solid #007bff;
+            border-radius: 6px;
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 12px;
+            width: 100%;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .diagram-pane img {
+            max-width: 98%;
+            max-height: 98%;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background: #fff;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 좌측: 선택한 리소스 정보 -->
+<div class="side-info" id="selectedResources">
+    <h2>📦 입력 정보</h2>
+    <div class="info-box" id="regionBox">리전: -</div>
+    <div class="info-box" id="ec2Box">EC2: -</div>
+    <div class="info-box" id="typeBox">타입: -</div>
+    <div class="info-box" id="s3Box">S3: -</div>
+    <div class="info-box" id="rdsBox">RDS: -</div>
+
+    <h2>🗄️  DB 정보 </h2>
+    <label for="dbName">Database 이름</label>
+    <input type="text" id="dbName" placeholder="예: MyDatabase">
+
+    <label for="dbPassword">Database 비밀번호</label>
+    <input type="text" id="dbPassword" placeholder="예: test123">
+</div>
+
+<div class="db-info" id="inputInformation">
+    <h2>🛠️  프로젝트 정보 </h2>
+    <label for="projectName">프로젝트 이름</label>
+    <input type="text" id="projectName" placeholder="Myproject">
+
+    <label for="githubUrl">GitHub 주소</label>
+    <input type="url" id="githubUrl" placeholder="https://github.com/your/repo">
+
+    <label for="accessKey">AWS Access Key</label>
+    <input type="text" id="accessKey" placeholder="예: AKIA...">
+
+    <label for="secretKey">AWS Secret Key</label>
+    <input type="text" id="secretKey" placeholder="예: wJalrXUtnF...">
+
+    <label for="sessionToken">AWS Session Token</label>
+    <input type="text" id="sessionToken" placeholder="임시 인증 토큰">
+
+    <button id="submitConfig" style="margin-top: 70px;">배포 시작</button>
+</div>
+
+<!-- 우측: 리전 아키텍처 이미지 -->
+<div class="diagram-pane">
+        <img id="diagramImage" alt="" src="/diagrams/${region}.png">
+</div>
+<script>
+    const params = new URLSearchParams(window.location.search);
+
+    const reiong = params.get("region");	
+    const userId = params.get("userId");
+    const region = params.get("region");
+    const ec2 = params.get("ec2");
+    const ec2type = params.get("ec2type");
+    const s3 = params.get("s3");
+    const rds = params.get("rds");
+
+    document.getElementById("regionBox").textContent = `리전: ${region ?? "-"}`;
+    document.getElementById("ec2Box").textContent = `EC2 인스턴스 수: ${ec2 ?? "-"}`;
+    document.getElementById("typeBox").textContent = `EC2 타입: ${ec2type ?? "-"}`;
+    document.getElementById("s3Box").textContent = `S3 버킷 수: ${s3 ?? "-"}`;
+    document.getElementById("rdsBox").textContent = `RDS 인스턴스 수: ${rds ?? "-"}`;
+
+    // 리전 아키텍처 이미지 로드
+    const img = document.getElementById("diagramImage");
+    if (region) {
+        img.src = `/diagrams/${region}.png`;
+        img.alt = `${region} 아키텍처 다이어그램`;
+        img.style.display = "block";
+    } else {
+        img.style.display = "none";
+    }
+
+    document.getElementById("submitConfig").addEventListener("click", async () => {
+        const projectName = document.getElementById("projectName").value.trim();
+        const githubUrl = document.getElementById("githubUrl").value.trim();
+        const accessKey = document.getElementById("accessKey").value.trim();
+        const secretKey = document.getElementById("secretKey").value.trim();
+        const sessionToken = document.getElementById("sessionToken").value.trim();
+        const dbName = document.getElementById("dbName").value.trim();
+        const dbPassword = document.getElementById("dbPassword").value.trim();
+
+        // 유효성 검사 추가
+        if (dbName.includes("_")) {
+            alert("❌ Database 이름에 밑줄(_)을 사용할 수 없습니다.");
+            return;
+        }
+
+        if (dbPassword.length < 8) {
+            alert("❌ Database 비밀번호는 8자 이상이어야 합니다.");
+            return;
+        }
+
+        if (!projectName || !githubUrl || !accessKey || !secretKey || !sessionToken || !dbName || !dbPassword || !region || !ec2 || !s3 || !rds) {
+            alert("모든 항목을 입력하세요.");
+            return;
+        }
+
+        const payload = {
+            project_name: projectName,
+            infrastructure_spec: {
+                user_name: userId,
+		region: region, 
+                project_link: githubUrl,
+                access_key: accessKey,
+                secret_key: secretKey,
+                session_token: sessionToken,
+                instance_count: parseInt(ec2),
+                db_identifier: `${projectName}db`,
+                db_count: parseInt(rds),
+                db_username: dbName,
+                db_password: dbPassword,
+                bucket_count: parseInt(s3)
+            }
+        };
+
+        try {
+            const res = await fetch("/final", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert("✅ 인프라 생성 요청 및 최종 저장이 완료되었습니다.");
+            } else {
+                throw new Error(`요청 실패: ${res.status}`);
+            }
+        } catch (err) {
+            alert("❌ 요청 실패: " + err.message);
+        }
+    });
+</script>
+
+<!-- 🔐 키 다운로드 영역 (처음엔 숨김) -->
+<div id="keyLinks" style="padding: 20px; background: #fff; display: none;">
+  <h3>다운로드 가능한 키</h3>
+  <ul id="keyList" style="padding-left: 20px;"></ul>
+</div>
+
+<script>
+  let keyDetected = false;  // ✅ 한 번만 alert 띄우기 위한 상태 변수
+  async function fetchKeys() {
+    try {
+      const res = await fetch("/available-keys");
+      const keys = await res.json();
+
+      const keyBox = document.getElementById("keyLinks");
+      const list = document.getElementById("keyList");
+      list.innerHTML = "";
+
+      if (keys.length > 0) {
+        if (!keyDetected) {
+          alert("AWS 인프라 생성 완료");
+          keyDetected = true;
+        }
+
+        keyBox.style.display = "block";  // 키가 있을 경우 보여줌
+        keys.forEach(file => {
+          const li = document.createElement("li");
+          const link = document.createElement("a");
+          link.href = `/download/${file}`;
+          link.textContent = `⬇️ ${file}`;
+          link.setAttribute("download", file);
+          li.appendChild(link);
+          list.appendChild(li);
+        });
+      } else {
+        keyBox.style.display = "none";  // 키가 없으면 감춤
+      }
+    } catch (err) {
+      console.error("키 목록 불러오기 실패:", err);
+    }
+  }
+
+  fetchKeys();               // 첫 실행
+  setInterval(fetchKeys, 5000);  // 이후 5초마다 확인
+</script>
+</body>
+</html>

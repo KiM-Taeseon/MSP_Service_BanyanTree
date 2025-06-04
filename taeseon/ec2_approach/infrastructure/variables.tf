@@ -2,7 +2,7 @@
 variable "aws_region" {
   description = "AWS region for all resources"
   type        = string
-  default     = "ap-northeast-2"
+  default     = "ap-northeast-1"
 }
 
 variable "state_bucket_name" {
@@ -24,7 +24,7 @@ variable "lock_table_name" {
 variable "ami_id" {
   description = "AMI ID for the EC2 instance"
   type        = string
-  default     = "ami-0f61efb6cfbcc18a4" # Amazon Linux 2 AMI (HVM) - adjust for your region
+  default     = "ami-037843ed9009f7d41" # Amazon Linux 2 AMI (HVM) - adjust for your region
 }
 
 variable "instance_type" {
