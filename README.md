@@ -4,7 +4,17 @@ AWS 기반 멀티 서비스 플랫폼(MSP) 인프라 자동화 및 관리 시스
 
 ## 프로젝트 아키텍처
 
-![MSP Project Architecture](msp_project_architecture.png)
+![MSP Project Architecture](images/msp_project_architecture.png)
+
+## Front Web Page
+
+사용자 친화적인 웹 인터페이스를 통해 AWS 인프라를 직관적으로 설계할 수 있습니다.
+
+### 메인 설정 페이지
+![Front Web Page 1](images/Front_webpage_1.png)
+
+### 리전 및 리소스 설정 페이지
+![Front Web Page 2](images/Front_webpage_2.png)
 
 ## 주요 기능
 
@@ -43,6 +53,10 @@ AWS 기반 멀티 서비스 플랫폼(MSP) 인프라 자동화 및 관리 시스
 ### 주요 디렉토리 구조
 ```
 MSP_Service_BanyanTree/
+├── images/                           # 프로젝트 이미지 파일들
+│   ├── msp_project_architecture.png  # 시스템 아키텍처 다이어그램
+│   ├── Front_webpage_1.png           # 웹 인터페이스 스크린샷 1
+│   └── Front_webpage_2.png           # 웹 인터페이스 스크린샷 2
 ├── taeseon/
 │   ├── Front_End/                    # 웹 인터페이스
 │   │   ├── next.html                 # 메인 설정 페이지
@@ -56,7 +70,6 @@ MSP_Service_BanyanTree/
 │   │   ├── project-builder/          # 프로젝트 빌드 서비스
 │   │   └── deploy.sh                 # 배포 스크립트
 │   └── terraform_templates/          # Terraform 템플릿
-└── msp_project_architecture.png      # 시스템 아키텍처 다이어그램
 ```
 
 ## 설치 및 배포
